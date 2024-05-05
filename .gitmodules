@@ -1,0 +1,12 @@
+[submodule "freetype2-demos"]
+	path = freetype2-demos
+	url = git://git.sv.nongnu.org/freetype/freetype2-demos.git
+[submodule "freetype2"]
+	path = freetype2
+	url = git://git.sv.nongnu.org/freetype/freetype2.git
+[submodule "skia-building-fun"]
+	path = skia-building-fun
+	url = git@github.com:HinTak/skia-building-fun.git
+[submodule "svg-native-viewer"]
+	path = svg-native-viewer
+	url = git@github.com:adobe/svg-native-viewer.git
