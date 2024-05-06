@@ -7,5 +7,5 @@ popd
 mkdir -p skia
 
 pushd skia
-  unzip ../skia-m125-bin.zip
+  unzip ../skia-building-fun/skia-m125-bin.zip
 popd
