@@ -9,3 +9,6 @@ mkdir -p skia
 pushd skia
   unzip ../skia-building-fun/skia-m125-bin.zip
 popd
+
+# Test that it was successful
+[ -f skia/out/Shared/libskia.so ]

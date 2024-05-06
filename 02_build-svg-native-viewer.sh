@@ -11,4 +11,5 @@ pushd svg-native-viewer/svgnative/
 popd
 
 # For relocating/copying result elsewhere, this might be needed:
+# (This command also double as a test that compilation was successful)
 chrpath -d svg-native-viewer/svgnative/build/linux/libSVGNativeViewerLib.so
