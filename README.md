@@ -43,3 +43,21 @@ TODO - Please read the CI yaml for now... you need to be able to build Skia, Ado
 
 * Putting all of them together, requires cairo and librsvg2 development files.
 
+# Relevant Bug-Filings
+
+Skia recommends using `clang`, although `gcc` works: [clang-18: -ffat-lto-objects gives multiple definition of `.str.llvm.0'](https://bugzilla.redhat.com/show_bug.cgi?id=2279170) .
+
+Skia: [symbol usage across modules](https://issues.skia.org/issues/40045538),
+[skunicode module's recent 'Reland "Fix defines for icu_subset"' commit in m125 broke skia_use_system_icu=true usage](https://issues.skia.org/338570715)
+
+Adobe's svg-native-viewer: Pulls [Skia m122 core support](https://github.com/adobe/svg-native-viewer/pull/199),
+[Misc linux clang build error fix](https://github.com/adobe/svg-native-viewer/pull/198),
+[Fixes Cairo-enabled build breakage from "Add C++17 compatibility in](https://github.com/adobe/svg-native-viewer/pull/196).
+Issues:
+[Misc missing headers build errors](https://github.com/adobe/svg-native-viewer/issues/197),
+[Cairo build breakage from recent c++17 change](https://github.com/adobe/svg-native-viewer/issues/195),
+[A few compatibility issues with recent cairo](https://github.com/adobe/svg-native-viewer/issues/188),
+[A few compatibility issues with skia m110](https://github.com/adobe/svg-native-viewer/issues/187),
+[Missing <cstdint> in svgnative/SVGRenderer.h](https://github.com/adobe/svg-native-viewer/issues/186),
+[This svg from google fonts gets mis-rendered.](https://github.com/adobe/svg-native-viewer/issues/185).
+
