@@ -2,6 +2,6 @@
 
 pushd freetype2
   ./autogen.sh
-  ./configure CC=clang++
+  ./configure CC=clang++  CFLAGS='-fPIC -DPIC'
   make
 popd
