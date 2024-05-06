@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - run: dnf install -y git
       - name: Checkout
         uses: actions/checkout@v4
         with:
