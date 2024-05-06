@@ -1,0 +1,151 @@
+diff --git a/svgnative/CMakeLists.txt b/svgnative/CMakeLists.txt
+index 519580d..c4fb763 100644
+--- a/svgnative/CMakeLists.txt
++++ b/svgnative/CMakeLists.txt
+@@ -77,7 +77,7 @@ find_package(PkgConfig)
+ # setting for Skia
+ ################################
+ if(SKIA)
+-    set(CMAKE_CXX_STANDARD 14)
++    set(CMAKE_CXX_STANDARD 17)
+     include(FindSkia)
+     if (NOT SKIA_AVAILABLE)
+         message(FATAL_ERROR "Fatal error: Skia port is requested, but no usable Skia library was found.")
+@@ -88,6 +88,7 @@ endif()
+ # setting for Cairo
+ ################################
+ if(CAIRO)
++    set(CMAKE_CXX_STANDARD 17)
+     # cmake wants to have full pathname of libcairo, instead of compiler flags.
+     # thus FindCairo.cmake works better than pkg_check_modules(CAIRO cairo)
+     include(FindCairo)
+diff --git a/svgnative/example/testSkia/CMakeLists.txt b/svgnative/example/testSkia/CMakeLists.txt
+index 124c32a..a700811 100644
+--- a/svgnative/example/testSkia/CMakeLists.txt
++++ b/svgnative/example/testSkia/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-add_executable(testSkia TestSkia.cpp)
++add_executable(testSkia TestSkia.cpp ../../src/Rect.cpp ../../src/Interval.cpp)
+ 
+ target_include_directories(testSkia PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/stylesheet/include")
+ target_include_directories(testSkia PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/skia/include/config")
+diff --git a/svgnative/include/svgnative/SVGRenderer.h b/svgnative/include/svgnative/SVGRenderer.h
+index 46827e2..987dc5c 100644
+--- a/svgnative/include/svgnative/SVGRenderer.h
++++ b/svgnative/include/svgnative/SVGRenderer.h
+@@ -23,6 +23,7 @@ governing permissions and limitations under the License.
+ #include <string>
+ #include <tuple>
+ #include <vector>
++#include <cstdint>
+ 
+ #if (__cplusplus >= 201703L)
+ #include <variant>
+diff --git a/svgnative/src/SVGDocumentImpl.cpp b/svgnative/src/SVGDocumentImpl.cpp
+index d1aca3c..a238d35 100644
+--- a/svgnative/src/SVGDocumentImpl.cpp
++++ b/svgnative/src/SVGDocumentImpl.cpp
+@@ -20,6 +20,7 @@ governing permissions and limitations under the License.
+ 
+ #include <cmath>
+ #include <limits>
++#include <cstring>
+ 
+ using namespace SVGNative::xml;
+ 
+diff --git a/svgnative/src/ports/cairo/CairoSVGRenderer.cpp b/svgnative/src/ports/cairo/CairoSVGRenderer.cpp
+index 0c86b03..f2c01e8 100644
+--- a/svgnative/src/ports/cairo/CairoSVGRenderer.cpp
++++ b/svgnative/src/ports/cairo/CairoSVGRenderer.cpp
+@@ -16,6 +16,7 @@ governing permissions and limitations under the License.
+ #include "cairo.h"
+ #include <math.h>
+ #include "CairoImageInfo.h"
++#include <cstring>
+ 
+ namespace SVGNative
+ {
+@@ -304,7 +305,7 @@ inline void createCairoPattern(const Paint& paint, float opacity, cairo_pattern_
+ {
+     *pat = NULL;
+ 
+-    if (paint.type() != typeid(Gradient))
++    if (!SVGNative::holds_alternative<Gradient>(paint))
+         return;
+ 
+     const auto& gradient = SVGNative::get<Gradient>(paint);
+diff --git a/svgnative/src/ports/skia/SkiaSVGRenderer.cpp b/svgnative/src/ports/skia/SkiaSVGRenderer.cpp
+index d20b7a2..4b4c565 100644
+--- a/svgnative/src/ports/skia/SkiaSVGRenderer.cpp
++++ b/svgnative/src/ports/skia/SkiaSVGRenderer.cpp
+@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
+ #include "svgnative/ports/skia/SkiaSVGRenderer.h"
+ #include "base64.h"
+ #include "svgnative/Config.h"
++#include "SkPathEffect.h"
+ #include "SkCanvas.h"
+ #include "SkCodec.h"
+ #include "SkData.h"
+@@ -126,7 +127,7 @@ inline sk_sp<SkImage> getOrientedImage(sk_sp<SkImage> srcImg, SkEncodedOrigin or
+         return nullptr;
+     }
+ 
+-    auto skRasterSurface = SkSurface::MakeRasterN32Premul(width, height);
++    auto skRasterSurface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(width, height));
+     auto skRasterCanvas = skRasterSurface->getCanvas();
+     if (offsetX != 0 || offsetY != 0)
+         skRasterCanvas->translate(offsetX, offsetY);
+@@ -150,10 +151,10 @@ SkiaSVGImageData::SkiaSVGImageData(const std::string& base64, ImageEncoding /*en
+         return;
+     SkEncodedOrigin origin = codec->getOrigin();
+     if (origin == SkEncodedOrigin::kTopLeft_SkEncodedOrigin)
+-        mImageData = SkImage::MakeFromEncoded(skData);
++        mImageData = SkImages::DeferredFromEncodedData(skData);
+     else
+     {
+-        auto rawImg = SkImage::MakeFromEncoded(skData);
++        auto rawImg = SkImages::DeferredFromEncodedData(skData);
+         mImageData = getOrientedImage(rawImg, origin);
+     }
+ }
+diff --git a/svgnative/tests/CMakeLists.txt b/svgnative/tests/CMakeLists.txt
+index aebf4ec..f9520c5 100644
+--- a/svgnative/tests/CMakeLists.txt
++++ b/svgnative/tests/CMakeLists.txt
+@@ -25,7 +25,7 @@ add_test(NAME rectangle_tests COMMAND rectangleTests)
+ # implementations for different ports and do the tests for all those
+ # that are available
+ if (USE_SKIA)
+-    add_executable(boundsTests bounds-tests.cpp)
++    add_executable(boundsTests bounds-tests.cpp ${SOURCE_FILES} ../src/ports/skia/SkiaSVGRenderer.cpp ../../third_party/cpp-base64/base64.cpp)
+     target_link_libraries(boundsTests SVGNativeViewerLib)
+     target_link_libraries(boundsTests gtest_main)
+     add_test(NAME bounds_tests COMMAND boundsTests)
+@@ -38,4 +38,5 @@ if (USE_SKIA)
+     target_include_directories(boundsTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/skia/include/gpu")
+     target_include_directories(boundsTests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../ports/skia")
+     target_link_libraries(boundsTests SVGNativeViewerLib "${SKIA_LIBRARY_PATH}")
++    target_link_libraries(boundsTests SVGNativeViewerLib "${SKIA_PATHKIT_LIBRARY_PATH}")
+ endif()
+diff --git a/svgnative/tests/bounds-tests.cpp b/svgnative/tests/bounds-tests.cpp
+index 592685b..1f7a5fd 100644
+--- a/svgnative/tests/bounds-tests.cpp
++++ b/svgnative/tests/bounds-tests.cpp
+@@ -32,7 +32,7 @@ using namespace SVGNative;
+ 
+ TEST(bounds_tests, bounds_basic_test)
+ {
+-    auto surface = SkSurface::MakeNull(1000, 1000);
++    auto surface = SkSurfaces::Null(1000, 1000);
+     auto canvas = surface->getCanvas();
+     SkiaSVGRenderer renderer;
+     renderer.SetSkCanvas(canvas);
+@@ -53,7 +53,7 @@ TEST(bounds_tests, bounds_basic_test)
+ TEST(bounds_tests, bounds_functional_test)
+ {
+     // get the surface and the canvas
+-    auto surface = SkSurface::MakeNull(1000, 1000);
++    auto surface = SkSurfaces::Null(1000, 1000);
+     auto canvas = surface->getCanvas();
+     auto renderer = std::make_shared<SVGNative::SkiaSVGRenderer>();
+     renderer->SetSkCanvas(canvas);
