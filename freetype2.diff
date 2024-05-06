@@ -1,0 +1,13 @@
+diff --git a/include/freetype/internal/psaux.h b/include/freetype/internal/psaux.h
+index 41f481d5a..1827219f7 100644
+--- a/include/freetype/internal/psaux.h
++++ b/include/freetype/internal/psaux.h
+@@ -359,7 +359,7 @@ FT_BEGIN_HEADER
+ #define T1_FIELD_CALLBACK( _ident, _name, _dict )       \
+           T1_NEW_CALLBACK_FIELD( _ident, _name, _dict )
+ 
+-#define T1_FIELD_ZERO  { 0, NULL, 0, 0, NULL, 0, 0, 0, 0, 0 }
++#define T1_FIELD_ZERO  { 0, NULL, (T1_FieldLocation)0, (T1_FieldType)0, NULL, 0, 0, 0, 0, 0 }
+ 
+ 
+   /*************************************************************************/
