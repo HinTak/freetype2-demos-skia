@@ -1,3 +1,5 @@
+[![CI](https://github.com/HinTak/freetype2-demos-skia/actions/workflows/ci.yml/badge.svg)](https://github.com/HinTak/freetype2-demos-skia/actions/workflows/ci.yml)
+
 This is a patch to build ft2demos to use skia + its built-in svg parser, or svg-native-viewer + cairo or skia, to render ot-svg, in addition to the current,
 which is via rsvg + cairo (which has some bugs). Earlier version posted on [harfbuzz-python-demos](https://github.com/HinTak/harfbuzz-python-demos).
 
