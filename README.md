@@ -1,3 +1,7 @@
+This repository contains freetype2-demos with additional Skia-based add-ons.
+
+It extends the functionality of FreeType's demos by integrating Skia, a high-performance 2D graphics library.
+
 [![CI](https://github.com/HinTak/freetype2-demos-skia/actions/workflows/ci.yml/badge.svg)](https://github.com/HinTak/freetype2-demos-skia/actions/workflows/ci.yml)
 
 This is a patch to build ft2demos to use skia + its built-in svg parser, or svg-native-viewer + cairo or skia, to render ot-svg, in addition to the current,
